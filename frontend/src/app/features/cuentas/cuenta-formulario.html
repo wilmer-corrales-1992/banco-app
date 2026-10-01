@@ -1,0 +1,85 @@
+<form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+  @if (errorGeneral(); as mensaje) {
+    <p class="alerta alerta--error" role="alert">{{ mensaje }}</p>
+  }
+
+  <div class="formulario__rejilla">
+    <app-campo-formulario
+      etiqueta="Número de cuenta"
+      para="cuenta-numero"
+      [control]="formulario.controls.numeroCuenta"
+      [mensajes]="mensajesNumero"
+    >
+      <input
+        id="cuenta-numero"
+        class="control"
+        type="text"
+        inputmode="numeric"
+        formControlName="numeroCuenta"
+        autocomplete="off"
+      />
+    </app-campo-formulario>
+
+    <app-campo-formulario
+      etiqueta="Tipo de cuenta"
+      para="cuenta-tipo"
+      [control]="formulario.controls.tipoCuenta"
+    >
+      <select id="cuenta-tipo" class="control" formControlName="tipoCuenta">
+        <option [ngValue]="null" disabled>Seleccione</option>
+        @for (tipo of tipos; track tipo) {
+          <option [ngValue]="tipo">{{ nombreTipoCuenta(tipo) }}</option>
+        }
+      </select>
+    </app-campo-formulario>
+
+    <app-campo-formulario
+      etiqueta="Saldo inicial"
+      para="cuenta-saldo"
+      [control]="formulario.controls.saldoInicial"
+      [mensajes]="mensajesSaldo"
+    >
+      <input
+        id="cuenta-saldo"
+        class="control"
+        type="number"
+        min="0"
+        step="0.01"
+        formControlName="saldoInicial"
+      />
+    </app-campo-formulario>
+
+    <app-campo-formulario
+      etiqueta="Cliente"
+      para="cuenta-cliente"
+      [control]="formulario.controls.clienteId"
+    >
+      <select id="cuenta-cliente" class="control" formControlName="clienteId">
+        <option value="" disabled>Seleccione</option>
+        @for (cliente of clientes(); track cliente.id) {
+          <option [value]="cliente.clienteId">
+            {{ cliente.nombre }} ({{ cliente.clienteId }})
+          </option>
+        }
+      </select>
+    </app-campo-formulario>
+
+    <label class="formulario__casilla">
+      <input type="checkbox" formControlName="estado" />
+      Cuenta activa
+    </label>
+  </div>
+
+  @if (esEdicion()) {
+    <p class="texto-suave">
+      El saldo inicial solo se puede cambiar mientras la cuenta no tenga movimientos.
+    </p>
+  }
+
+  <div class="formulario__acciones">
+    <button type="button" class="boton" (click)="cancelado.emit()">Cancelar</button>
+    <button type="submit" class="boton boton--primario" [disabled]="guardando()">
+      {{ guardando() ? 'Guardando...' : 'Guardar' }}
+    </button>
+  </div>
+</form>

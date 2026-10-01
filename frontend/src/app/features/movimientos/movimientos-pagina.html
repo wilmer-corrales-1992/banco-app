@@ -1,0 +1,52 @@
+<app-encabezado-pagina titulo="Movimientos" [(busqueda)]="listado.busqueda" (accion)="nuevo()" />
+
+<app-tabla-datos
+  descripcion="Listado de movimientos"
+  [columnas]="columnas"
+  [filas]="listado.filtrados()"
+  [identificador]="identificador"
+  [cargando]="listado.cargando()"
+  [mensajeVacio]="
+    listado.busqueda()
+      ? 'Ningún movimiento coincide con la búsqueda'
+      : 'No hay movimientos registrados'
+  "
+>
+  <ng-template [appAccionesFila]="listado.filtrados()" let-movimiento>
+    <button type="button" class="accion" (click)="editar(movimiento)">Editar</button>
+    <button type="button" class="accion accion--peligro" (click)="porEliminar.set(movimiento)">
+      Eliminar
+    </button>
+  </ng-template>
+</app-tabla-datos>
+
+@if (formularioAbierto()) {
+  <app-modal
+    [titulo]="seleccionado() ? 'Editar movimiento' : 'Nuevo movimiento'"
+    (cerrar)="formularioAbierto.set(false)"
+  >
+    <app-movimiento-formulario
+      [movimiento]="seleccionado()"
+      (guardado)="alGuardar($event)"
+      (cancelado)="formularioAbierto.set(false)"
+    />
+  </app-modal>
+}
+
+@if (porEliminar(); as movimiento) {
+  <app-dialogo-confirmacion
+    titulo="Eliminar movimiento"
+    [mensaje]="
+      '¿Eliminar el ' +
+      nombreTipoMovimiento(movimiento.tipoMovimiento).toLowerCase() +
+      ' de ' +
+      formatearMoneda(movimiento.valor) +
+      ' en la cuenta ' +
+      movimiento.numeroCuenta +
+      '? Solo se puede eliminar el último movimiento de cada cuenta.'
+    "
+    [procesando]="eliminando()"
+    (confirmar)="eliminar()"
+    (cancelar)="porEliminar.set(null)"
+  />
+}

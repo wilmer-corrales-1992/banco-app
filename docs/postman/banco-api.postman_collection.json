@@ -1,0 +1,1590 @@
+{
+  "info": {
+    "name": "Banco API",
+    "description": "API REST de clientes, cuentas, movimientos y reportes.\n\nEjecutar las carpetas en orden sobre una base recien cargada con BaseDatos.sql: la carpeta 3 registra los movimientos del ejercicio y sus saldos esperados dependen de ese estado inicial. La carpeta 6 borra el cliente y la cuenta de prueba creados en las carpetas 1 y 2.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1 Clientes",
+      "description": "CRUD de clientes. Crea el cliente de prueba pprueba.",
+      "item": [
+        {
+          "name": "Listar clientes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Incluye los clientes iniciales\", () => { const ids = pm.response.json().map(c => c.clienteId); pm.expect(ids).to.include.members([\"jlema\", \"mmontalvo\", \"josorio\"]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear cliente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Pedro Prueba\",\n  \"genero\": \"MASCULINO\",\n  \"edad\": 33,\n  \"identificacion\": \"1700000099\",\n  \"direccion\": \"Av. de prueba 123\",\n  \"telefono\": \"0991234567\",\n  \"clienteId\": \"pprueba\",\n  \"contrasena\": \"9999\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"No expone la contrasena\", () => pm.expect(pm.response.json()).to.not.have.property(\"contrasena\"));",
+                  "pm.test(\"clienteId es pprueba\", () => pm.expect(pm.response.json().clienteId).to.eql(\"pprueba\"));",
+                  "pm.test(\"estado es True\", () => pm.expect(pm.response.json().estado).to.eql(true));",
+                  "pm.test(\"Devuelve Location\", () => pm.expect(pm.response.headers.get(\"Location\")).to.match(/\\/clientes\\/\\d+$/));",
+                  "pm.collectionVariables.set(\"idClientePrueba\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear cliente duplicado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Pedro Prueba\",\n  \"genero\": \"MASCULINO\",\n  \"edad\": 33,\n  \"identificacion\": \"1700000099\",\n  \"direccion\": \"Av. de prueba 123\",\n  \"telefono\": \"0991234567\",\n  \"clienteId\": \"pprueba\",\n  \"contrasena\": \"9999\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Error con formato uniforme\", () => { const e = pm.response.json(); pm.expect(e).to.include.keys(\"fecha\", \"estado\", \"error\", \"mensaje\", \"ruta\"); });",
+                  "pm.test(\"Mensaje: Ya existe un cliente con clienteId pprueba\", () => pm.expect(pm.response.json().mensaje).to.eql(\"Ya existe un cliente con clienteId pprueba\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear cliente con datos invalidos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"\",\n  \"genero\": \"X\",\n  \"edad\": 130\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Error con formato uniforme\", () => { const e = pm.response.json(); pm.expect(e).to.include.keys(\"fecha\", \"estado\", \"error\", \"mensaje\", \"ruta\"); });",
+                  "pm.test(\"Indica los valores permitidos de genero\", () => pm.expect(pm.response.json().mensaje).to.include(\"MASCULINO, FEMENINO, OTRO\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear cliente sin campos obligatorios",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Sin datos\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Error con formato uniforme\", () => { const e = pm.response.json(); pm.expect(e).to.include.keys(\"fecha\", \"estado\", \"error\", \"mensaje\", \"ruta\"); });",
+                  "pm.test(\"Lista los campos con error\", () => { const campos = pm.response.json().errores.map(e => e.campo); pm.expect(campos).to.include.members([\"genero\", \"edad\", \"identificacion\", \"direccion\", \"telefono\", \"clienteId\", \"contrasena\"]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener cliente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/{{idClientePrueba}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "{{idClientePrueba}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"No expone la contrasena\", () => pm.expect(pm.response.json()).to.not.have.property(\"contrasena\"));",
+                  "pm.test(\"nombre es Pedro Prueba\", () => pm.expect(pm.response.json().nombre).to.eql(\"Pedro Prueba\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener cliente inexistente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "999999"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Error con formato uniforme\", () => { const e = pm.response.json(); pm.expect(e).to.include.keys(\"fecha\", \"estado\", \"error\", \"mensaje\", \"ruta\"); });",
+                  "pm.test(\"Mensaje: Cliente no encontrado con id 999999\", () => pm.expect(pm.response.json().mensaje).to.eql(\"Cliente no encontrado con id 999999\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar cliente (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/{{idClientePrueba}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "{{idClientePrueba}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Pedro Prueba Editado\",\n  \"genero\": \"MASCULINO\",\n  \"edad\": 34,\n  \"identificacion\": \"1700000099\",\n  \"direccion\": \"Av. de prueba 123\",\n  \"telefono\": \"0991234567\",\n  \"clienteId\": \"pprueba\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "En PUT la contrasena es opcional: si no se envia se conserva la actual."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"nombre es Pedro Prueba Editado\", () => pm.expect(pm.response.json().nombre).to.eql(\"Pedro Prueba Editado\"));",
+                  "pm.test(\"edad es 34\", () => pm.expect(pm.response.json().edad).to.eql(34));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar cliente parcial (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/{{idClientePrueba}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "{{idClientePrueba}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"telefono\": \"0987654321\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"telefono es 0987654321\", () => pm.expect(pm.response.json().telefono).to.eql(\"0987654321\"));",
+                  "pm.test(\"nombre es Pedro Prueba Editado\", () => pm.expect(pm.response.json().nombre).to.eql(\"Pedro Prueba Editado\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2 Cuentas",
+      "description": "CRUD de cuentas. Crea la cuenta de prueba 999001 para pprueba.",
+      "item": [
+        {
+          "name": "Listar cuentas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Incluye las cuentas iniciales\", () => { const n = pm.response.json().map(c => c.numeroCuenta); pm.expect(n).to.include.members([\"478758\", \"225487\", \"495878\", \"496825\", \"585545\"]); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar cuentas de un cliente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas?clienteId=jlema",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas"
+              ],
+              "query": [
+                {
+                  "key": "clienteId",
+                  "value": "jlema"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Jose Lema tiene dos cuentas\", () => pm.expect(pm.response.json().map(c => c.numeroCuenta)).to.have.members([\"478758\", \"585545\"]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear cuenta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroCuenta\": \"999001\",\n  \"tipoCuenta\": \"AHORRO\",\n  \"saldoInicial\": 300,\n  \"estado\": true,\n  \"clienteId\": \"pprueba\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"cliente es Pedro Prueba Editado\", () => pm.expect(pm.response.json().cliente).to.eql(\"Pedro Prueba Editado\"));",
+                  "pm.test(\"saldoInicial es 300\", () => pm.expect(pm.response.json().saldoInicial).to.eql(300));",
+                  "pm.collectionVariables.set(\"idCuentaPrueba\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear cuenta con numero repetido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroCuenta\": \"478758\",\n  \"tipoCuenta\": \"AHORRO\",\n  \"saldoInicial\": 300,\n  \"estado\": true,\n  \"clienteId\": \"pprueba\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Error con formato uniforme\", () => { const e = pm.response.json(); pm.expect(e).to.include.keys(\"fecha\", \"estado\", \"error\", \"mensaje\", \"ruta\"); });",
+                  "pm.test(\"Mensaje: Ya existe la cuenta 478758\", () => pm.expect(pm.response.json().mensaje).to.eql(\"Ya existe la cuenta 478758\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Crear cuenta para cliente inexistente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroCuenta\": \"999002\",\n  \"tipoCuenta\": \"AHORRO\",\n  \"saldoInicial\": 300,\n  \"estado\": true,\n  \"clienteId\": \"nadie\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Mensaje: Cliente no encontrado con clienteId nadie\", () => pm.expect(pm.response.json().mensaje).to.eql(\"Cliente no encontrado con clienteId nadie\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener cuenta",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/{{idCuentaPrueba}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "{{idCuentaPrueba}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"numeroCuenta es 999001\", () => pm.expect(pm.response.json().numeroCuenta).to.eql(\"999001\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar cuenta (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/{{idCuentaPrueba}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "{{idCuentaPrueba}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroCuenta\": \"999001\",\n  \"tipoCuenta\": \"CORRIENTE\",\n  \"saldoInicial\": 300,\n  \"estado\": true,\n  \"clienteId\": \"pprueba\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"tipoCuenta es CORRIENTE\", () => pm.expect(pm.response.json().tipoCuenta).to.eql(\"CORRIENTE\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar cuenta parcial (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/{{idCuentaPrueba}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "{{idCuentaPrueba}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tipoCuenta\": \"AHORRO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"tipoCuenta es AHORRO\", () => pm.expect(pm.response.json().tipoCuenta).to.eql(\"AHORRO\"));",
+                  "pm.test(\"saldoInicial es 300\", () => pm.expect(pm.response.json().saldoInicial).to.eql(300));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3 Movimientos del ejercicio",
+      "description": "Los cuatro movimientos del enunciado y los mensajes Saldo no disponible y Cupo diario excedido.",
+      "item": [
+        {
+          "name": "Retiro de 575 en 478758",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroCuenta\": \"478758\",\n  \"tipoMovimiento\": \"DEBITO\",\n  \"valor\": 575\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"valor es -575\", () => pm.expect(pm.response.json().valor).to.eql(-575));",
+                  "pm.test(\"saldo es 1425\", () => pm.expect(pm.response.json().saldo).to.eql(1425));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Deposito de 600 en 225487",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroCuenta\": \"225487\",\n  \"tipoMovimiento\": \"CREDITO\",\n  \"valor\": 600\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"valor es 600\", () => pm.expect(pm.response.json().valor).to.eql(600));",
+                  "pm.test(\"saldo es 700\", () => pm.expect(pm.response.json().saldo).to.eql(700));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Deposito de 150 en 495878",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroCuenta\": \"495878\",\n  \"tipoMovimiento\": \"CREDITO\",\n  \"valor\": 150\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"saldo es 150\", () => pm.expect(pm.response.json().saldo).to.eql(150));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Retiro de 540 en 496825",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroCuenta\": \"496825\",\n  \"tipoMovimiento\": \"DEBITO\",\n  \"valor\": 540\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"saldo es 0\", () => pm.expect(pm.response.json().saldo).to.eql(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Retiro sin saldo (Saldo no disponible)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroCuenta\": \"496825\",\n  \"tipoMovimiento\": \"DEBITO\",\n  \"valor\": 10\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"Error con formato uniforme\", () => { const e = pm.response.json(); pm.expect(e).to.include.keys(\"fecha\", \"estado\", \"error\", \"mensaje\", \"ruta\"); });",
+                  "pm.test(\"Mensaje: Saldo no disponible\", () => pm.expect(pm.response.json().mensaje).to.eql(\"Saldo no disponible\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Retiro sobre el cupo (Cupo diario excedido)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroCuenta\": \"478758\",\n  \"tipoMovimiento\": \"DEBITO\",\n  \"valor\": 500\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "478758 ya retiro 575 hoy; 575 + 500 supera el limite diario de 1000."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 422\", () => pm.response.to.have.status(422));",
+                  "pm.test(\"Error con formato uniforme\", () => { const e = pm.response.json(); pm.expect(e).to.include.keys(\"fecha\", \"estado\", \"error\", \"mensaje\", \"ruta\"); });",
+                  "pm.test(\"Mensaje: Cupo diario excedido\", () => pm.expect(pm.response.json().mensaje).to.eql(\"Cupo diario excedido\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Movimiento con valor invalido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroCuenta\": \"478758\",\n  \"tipoMovimiento\": \"DEBITO\",\n  \"valor\": -5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Error con formato uniforme\", () => { const e = pm.response.json(); pm.expect(e).to.include.keys(\"fecha\", \"estado\", \"error\", \"mensaje\", \"ruta\"); });",
+                  "pm.test(\"Error en el campo valor\", () => pm.expect(pm.response.json().errores[0].campo).to.eql(\"valor\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4 Movimientos CRUD",
+      "description": "PUT, PATCH y DELETE de movimientos sobre la cuenta de prueba.",
+      "item": [
+        {
+          "name": "Registrar deposito",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroCuenta\": \"999001\",\n  \"tipoMovimiento\": \"CREDITO\",\n  \"valor\": 200\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"saldo es 500\", () => pm.expect(pm.response.json().saldo).to.eql(500));",
+                  "pm.collectionVariables.set(\"idMovimientoPrueba\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar movimientos de una cuenta",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos?numeroCuenta=999001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos"
+              ],
+              "query": [
+                {
+                  "key": "numeroCuenta",
+                  "value": "999001"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Tiene un movimiento\", () => pm.expect(pm.response.json()).to.have.lengthOf(1));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Obtener movimiento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos/{{idMovimientoPrueba}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos",
+                "{{idMovimientoPrueba}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"tipoMovimiento es CREDITO\", () => pm.expect(pm.response.json().tipoMovimiento).to.eql(\"CREDITO\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar movimiento parcial (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos/{{idMovimientoPrueba}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos",
+                "{{idMovimientoPrueba}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"valor\": 250\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"valor es 250\", () => pm.expect(pm.response.json().valor).to.eql(250));",
+                  "pm.test(\"saldo es 550\", () => pm.expect(pm.response.json().saldo).to.eql(550));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar movimiento (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos/{{idMovimientoPrueba}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos",
+                "{{idMovimientoPrueba}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"numeroCuenta\": \"999001\",\n  \"tipoMovimiento\": \"DEBITO\",\n  \"valor\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Solo se puede modificar el ultimo movimiento de cada cuenta; el saldo se recalcula."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"valor es -100\", () => pm.expect(pm.response.json().valor).to.eql(-100));",
+                  "pm.test(\"saldo es 200\", () => pm.expect(pm.response.json().saldo).to.eql(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "No se borra una cuenta con movimientos",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/{{idCuentaPrueba}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "{{idCuentaPrueba}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Mensaje: No se puede eliminar la cuenta 999001 porque tiene movimientos\", () => pm.expect(pm.response.json().mensaje).to.eql(\"No se puede eliminar la cuenta 999001 porque tiene movimientos\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar movimiento",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/movimientos/{{idMovimientoPrueba}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "movimientos",
+                "{{idMovimientoPrueba}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5 Reportes",
+      "description": "Estado de cuenta de los ultimos 30 dias en JSON y en PDF.",
+      "item": [
+        {
+          "name": "Reporte en JSON",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reportes?fecha={{fechaInicio}},{{fechaFin}}&clienteId=jlema&formato=json",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes"
+              ],
+              "query": [
+                {
+                  "key": "fecha",
+                  "value": "{{fechaInicio}},{{fechaFin}}"
+                },
+                {
+                  "key": "clienteId",
+                  "value": "jlema"
+                },
+                {
+                  "key": "formato",
+                  "value": "json"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"cliente es Jose Lema\", () => pm.expect(pm.response.json().cliente).to.eql(\"Jose Lema\"));",
+                  "pm.test(\"Incluye sus dos cuentas\", () => pm.expect(pm.response.json().cuentas.map(c => c.numeroCuenta)).to.have.members([\"478758\", \"585545\"]));",
+                  "pm.test(\"Cada fila trae las columnas del estado de cuenta\", () => { const c = pm.response.json().cuentas.find(x => x.numeroCuenta === \"478758\"); pm.expect(c.movimientos[0]).to.include.keys(\"fecha\", \"cliente\", \"numeroCuenta\", \"tipo\", \"saldoInicial\", \"estado\", \"movimiento\", \"saldoDisponible\"); });",
+                  "pm.test(\"Totales de debitos del rango\", () => pm.expect(pm.response.json().totalDebitos).to.be.at.least(575));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reporte en PDF (base64)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reportes?fecha={{fechaInicio}},{{fechaFin}}&clienteId=mmontalvo&formato=pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes"
+              ],
+              "query": [
+                {
+                  "key": "fecha",
+                  "value": "{{fechaInicio}},{{fechaFin}}"
+                },
+                {
+                  "key": "clienteId",
+                  "value": "mmontalvo"
+                },
+                {
+                  "key": "formato",
+                  "value": "pdf"
+                }
+              ]
+            },
+            "description": "JVBERi es %PDF codificado en base64."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"tipoContenido es application/pdf\", () => pm.expect(pm.response.json().tipoContenido).to.eql(\"application/pdf\"));",
+                  "pm.test(\"El contenido es un PDF en base64\", () => pm.expect(pm.response.json().contenidoBase64.startsWith(\"JVBERi\")).to.be.true);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reporte con fechas invertidas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reportes?fecha={{fechaFin}},{{fechaInicio}}&clienteId=jlema",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes"
+              ],
+              "query": [
+                {
+                  "key": "fecha",
+                  "value": "{{fechaFin}},{{fechaInicio}}"
+                },
+                {
+                  "key": "clienteId",
+                  "value": "jlema"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: La fecha inicial no puede ser posterior a la fecha final\", () => pm.expect(pm.response.json().mensaje).to.eql(\"La fecha inicial no puede ser posterior a la fecha final\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reporte con formato no soportado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reportes?fecha={{fechaInicio}},{{fechaFin}}&clienteId=jlema&formato=xml",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reportes"
+              ],
+              "query": [
+                {
+                  "key": "fecha",
+                  "value": "{{fechaInicio}},{{fechaFin}}"
+                },
+                {
+                  "key": "clienteId",
+                  "value": "jlema"
+                },
+                {
+                  "key": "formato",
+                  "value": "xml"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Mensaje: Formato de reporte no soportado: xml. Valores permitidos: json, pdf\", () => pm.expect(pm.response.json().mensaje).to.eql(\"Formato de reporte no soportado: xml. Valores permitidos: json, pdf\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const dosDigitos = n => String(n).padStart(2, '0');",
+              "const fecha = d => `${d.getFullYear()}-${dosDigitos(d.getMonth() + 1)}-${dosDigitos(d.getDate())}`;",
+              "const hoy = new Date();",
+              "const hace30 = new Date(hoy.getTime() - 30 * 24 * 60 * 60 * 1000);",
+              "pm.collectionVariables.set('fechaFin', fecha(hoy));",
+              "pm.collectionVariables.set('fechaInicio', fecha(hace30));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6 Limpieza",
+      "description": "Borra los datos de prueba creados por la coleccion.",
+      "item": [
+        {
+          "name": "No se borra un cliente con cuentas",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/{{idClientePrueba}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "{{idClientePrueba}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Mensaje: No se puede eliminar el cliente pprueba porque tiene cuentas asociadas\", () => pm.expect(pm.response.json().mensaje).to.eql(\"No se puede eliminar el cliente pprueba porque tiene cuentas asociadas\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar cuenta de prueba",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cuentas/{{idCuentaPrueba}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cuentas",
+                "{{idCuentaPrueba}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Eliminar cliente de prueba",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/{{idClientePrueba}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "{{idClientePrueba}}"
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Responde 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api"
+    },
+    {
+      "key": "idClientePrueba",
+      "value": ""
+    },
+    {
+      "key": "idCuentaPrueba",
+      "value": ""
+    },
+    {
+      "key": "idMovimientoPrueba",
+      "value": ""
+    },
+    {
+      "key": "fechaInicio",
+      "value": ""
+    },
+    {
+      "key": "fechaFin",
+      "value": ""
+    }
+  ]
+}

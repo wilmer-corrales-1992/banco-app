@@ -1,0 +1,18 @@
+# Backend (Maven / IntelliJ)
+backend/target/
+*.class
+*.log
+.idea/
+*.iml
+.mvn/wrapper/maven-wrapper.jar
+
+# Frontend (Angular / Node)
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+
+# Entorno y sistema
+.env
+.DS_Store
+Thumbs.db

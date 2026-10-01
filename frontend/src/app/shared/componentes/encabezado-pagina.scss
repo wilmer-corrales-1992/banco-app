@@ -1,0 +1,29 @@
+:host {
+  display: block;
+  margin-bottom: 1.25rem;
+}
+
+.encabezado__titulo {
+  margin-bottom: 1.25rem;
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+.encabezado__barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.encabezado__buscador {
+  flex: 0 1 22rem;
+}
+
+@media (max-width: 600px) {
+  .encabezado__buscador,
+  .encabezado__barra .boton {
+    flex: 1 1 100%;
+  }
+}

@@ -1,0 +1,128 @@
+<form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+  @if (errorGeneral(); as mensaje) {
+    <p class="alerta alerta--error" role="alert">{{ mensaje }}</p>
+  }
+
+  <div class="formulario__rejilla">
+    <app-campo-formulario
+      etiqueta="Nombre"
+      para="cliente-nombre"
+      [control]="formulario.controls.nombre"
+    >
+      <input
+        id="cliente-nombre"
+        class="control"
+        type="text"
+        formControlName="nombre"
+        autocomplete="off"
+      />
+    </app-campo-formulario>
+
+    <app-campo-formulario
+      etiqueta="Identificación"
+      para="cliente-identificacion"
+      [control]="formulario.controls.identificacion"
+    >
+      <input
+        id="cliente-identificacion"
+        class="control"
+        type="text"
+        formControlName="identificacion"
+        autocomplete="off"
+      />
+    </app-campo-formulario>
+
+    <app-campo-formulario
+      etiqueta="Género"
+      para="cliente-genero"
+      [control]="formulario.controls.genero"
+    >
+      <select id="cliente-genero" class="control" formControlName="genero">
+        <option [ngValue]="null" disabled>Seleccione</option>
+        @for (genero of generos; track genero) {
+          <option [ngValue]="genero">{{ nombreGenero(genero) }}</option>
+        }
+      </select>
+    </app-campo-formulario>
+
+    <app-campo-formulario etiqueta="Edad" para="cliente-edad" [control]="formulario.controls.edad">
+      <input
+        id="cliente-edad"
+        class="control"
+        type="number"
+        min="0"
+        max="120"
+        step="1"
+        formControlName="edad"
+      />
+    </app-campo-formulario>
+
+    <app-campo-formulario
+      etiqueta="Dirección"
+      para="cliente-direccion"
+      [control]="formulario.controls.direccion"
+    >
+      <input
+        id="cliente-direccion"
+        class="control"
+        type="text"
+        formControlName="direccion"
+        autocomplete="off"
+      />
+    </app-campo-formulario>
+
+    <app-campo-formulario
+      etiqueta="Teléfono"
+      para="cliente-telefono"
+      [control]="formulario.controls.telefono"
+    >
+      <input
+        id="cliente-telefono"
+        class="control"
+        type="tel"
+        formControlName="telefono"
+        autocomplete="off"
+      />
+    </app-campo-formulario>
+
+    <app-campo-formulario
+      etiqueta="Usuario (clienteId)"
+      para="cliente-clienteId"
+      [control]="formulario.controls.clienteId"
+    >
+      <input
+        id="cliente-clienteId"
+        class="control"
+        type="text"
+        formControlName="clienteId"
+        autocomplete="off"
+      />
+    </app-campo-formulario>
+
+    <app-campo-formulario
+      [etiqueta]="esEdicion() ? 'Contraseña (vacía para conservarla)' : 'Contraseña'"
+      para="cliente-contrasena"
+      [control]="formulario.controls.contrasena"
+    >
+      <input
+        id="cliente-contrasena"
+        class="control"
+        type="password"
+        formControlName="contrasena"
+        autocomplete="new-password"
+      />
+    </app-campo-formulario>
+
+    <label class="formulario__casilla">
+      <input type="checkbox" formControlName="estado" />
+      Cliente activo
+    </label>
+  </div>
+
+  <div class="formulario__acciones">
+    <button type="button" class="boton" (click)="cancelado.emit()">Cancelar</button>
+    <button type="submit" class="boton boton--primario" [disabled]="guardando()">
+      {{ guardando() ? 'Guardando...' : 'Guardar' }}
+    </button>
+  </div>
+</form>

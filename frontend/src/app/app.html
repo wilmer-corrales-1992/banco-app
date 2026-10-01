@@ -1,0 +1,27 @@
+<header class="cabecera">
+  <a class="cabecera__marca" routerLink="/">BANCO</a>
+</header>
+
+<div class="cuerpo">
+  <nav class="menu" aria-label="Menú principal">
+    <ul class="menu__lista">
+      @for (opcion of menu; track opcion.ruta) {
+        <li>
+          <a
+            class="menu__enlace"
+            [routerLink]="opcion.ruta"
+            routerLinkActive="menu__enlace--activo"
+            ariaCurrentWhenActive="page"
+            >{{ opcion.etiqueta }}</a
+          >
+        </li>
+      }
+    </ul>
+  </nav>
+
+  <main class="contenido">
+    <router-outlet />
+  </main>
+</div>
+
+<app-panel-notificaciones />

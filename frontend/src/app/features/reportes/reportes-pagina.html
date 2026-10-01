@@ -1,0 +1,106 @@
+<app-encabezado-pagina titulo="Reportes" [conBuscador]="false" [textoBoton]="null" />
+
+<form class="filtros" [formGroup]="formulario" (ngSubmit)="generar()" novalidate>
+  <app-campo-formulario
+    etiqueta="Cliente"
+    para="reporte-cliente"
+    [control]="formulario.controls.clienteId"
+  >
+    <select id="reporte-cliente" class="control" formControlName="clienteId">
+      <option value="" disabled>Seleccione un cliente</option>
+      @for (cliente of clientes(); track cliente.id) {
+        <option [value]="cliente.clienteId">{{ cliente.nombre }} ({{ cliente.clienteId }})</option>
+      }
+    </select>
+  </app-campo-formulario>
+
+  <app-campo-formulario
+    etiqueta="Desde"
+    para="reporte-inicio"
+    [control]="formulario.controls.fechaInicio"
+  >
+    <input id="reporte-inicio" class="control" type="date" formControlName="fechaInicio" />
+  </app-campo-formulario>
+
+  <app-campo-formulario
+    etiqueta="Hasta"
+    para="reporte-fin"
+    [control]="formulario.controls.fechaFin"
+  >
+    <input id="reporte-fin" class="control" type="date" formControlName="fechaFin" />
+  </app-campo-formulario>
+
+  <div class="filtros__acciones">
+    <button type="submit" class="boton boton--primario" [disabled]="generando()">
+      {{ generando() ? 'Generando...' : 'Generar' }}
+    </button>
+    <button type="button" class="boton" [disabled]="descargando()" (click)="descargarPdf()">
+      {{ descargando() ? 'Preparando PDF...' : 'Descargar PDF' }}
+    </button>
+  </div>
+</form>
+
+@if (
+  formulario.hasError('rangoFechas') &&
+  (formulario.controls.fechaInicio.touched || formulario.controls.fechaFin.touched)
+) {
+  <p class="alerta alerta--error" role="alert">
+    La fecha inicial no puede ser posterior a la fecha final.
+  </p>
+}
+
+@if (errorGeneral(); as mensaje) {
+  <p class="alerta alerta--error" role="alert">{{ mensaje }}</p>
+}
+
+@if (reporte(); as reporte) {
+  <section class="reporte" aria-label="Estado de cuenta">
+    <header class="reporte__cabecera">
+      <h2>Estado de cuenta de {{ reporte.cliente }}</h2>
+      <p class="texto-suave">
+        Del {{ formatearFecha(reporte.fechaInicio) }} al {{ formatearFecha(reporte.fechaFin) }}.
+        Generado el {{ formatearFechaHora(reporte.fechaGeneracion) }}.
+      </p>
+    </header>
+
+    <dl class="resumen">
+      <div class="resumen__dato">
+        <dt>Cuentas</dt>
+        <dd>{{ reporte.cuentas.length }}</dd>
+      </div>
+      <div class="resumen__dato">
+        <dt>Total créditos</dt>
+        <dd class="valor valor--credito">{{ formatearMoneda(reporte.totalCreditos) }}</dd>
+      </div>
+      <div class="resumen__dato">
+        <dt>Total débitos</dt>
+        <dd class="valor valor--debito">{{ formatearMoneda(reporte.totalDebitos) }}</dd>
+      </div>
+    </dl>
+
+    @for (cuenta of reporte.cuentas; track cuenta.numeroCuenta) {
+      <article class="reporte__cuenta">
+        <h3>Cuenta {{ cuenta.numeroCuenta }} {{ nombreTipoCuenta(cuenta.tipoCuenta) }}</h3>
+        <p class="texto-suave reporte__detalle">
+          Saldo inicial {{ formatearMoneda(cuenta.saldoInicial) }}. Saldo disponible
+          {{ formatearMoneda(cuenta.saldoDisponible) }}. Estado {{ textoEstado(cuenta.estado) }}.
+        </p>
+        <app-tabla-datos
+          [descripcion]="'Movimientos de la cuenta ' + cuenta.numeroCuenta"
+          [columnas]="columnas"
+          [filas]="cuenta.movimientos"
+          [identificador]="identificadorFila"
+          mensajeVacio="Sin movimientos en el periodo"
+        />
+        <p class="reporte__totales">
+          Créditos
+          <span class="valor valor--credito">{{ formatearMoneda(cuenta.totalCreditos) }}</span>
+          Débitos
+          <span class="valor valor--debito">{{ formatearMoneda(cuenta.totalDebitos) }}</span>
+        </p>
+      </article>
+    } @empty {
+      <p class="texto-suave">El cliente no tiene cuentas registradas.</p>
+    }
+  </section>
+}

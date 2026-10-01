@@ -1,0 +1,51 @@
+<app-encabezado-pagina titulo="Cuentas" [(busqueda)]="listado.busqueda" (accion)="nueva()" />
+
+<app-tabla-datos
+  descripcion="Listado de cuentas"
+  [columnas]="columnas"
+  [filas]="listado.filtrados()"
+  [identificador]="identificador"
+  [cargando]="listado.cargando()"
+  [mensajeVacio]="
+    listado.busqueda() ? 'Ninguna cuenta coincide con la búsqueda' : 'No hay cuentas registradas'
+  "
+>
+  <ng-template [appAccionesFila]="listado.filtrados()" let-cuenta>
+    <button type="button" class="accion" (click)="editar(cuenta)">Editar</button>
+    <button type="button" class="accion" (click)="cambiarEstado(cuenta)">
+      {{ cuenta.estado ? 'Desactivar' : 'Activar' }}
+    </button>
+    <button type="button" class="accion accion--peligro" (click)="porEliminar.set(cuenta)">
+      Eliminar
+    </button>
+  </ng-template>
+</app-tabla-datos>
+
+@if (formularioAbierto()) {
+  <app-modal
+    [titulo]="seleccionada() ? 'Editar cuenta' : 'Nueva cuenta'"
+    (cerrar)="formularioAbierto.set(false)"
+  >
+    <app-cuenta-formulario
+      [cuenta]="seleccionada()"
+      (guardado)="alGuardar($event)"
+      (cancelado)="formularioAbierto.set(false)"
+    />
+  </app-modal>
+}
+
+@if (porEliminar(); as cuenta) {
+  <app-dialogo-confirmacion
+    titulo="Eliminar cuenta"
+    [mensaje]="
+      '¿Eliminar la cuenta ' +
+      cuenta.numeroCuenta +
+      ' de ' +
+      cuenta.cliente +
+      '? Esta acción no se puede deshacer.'
+    "
+    [procesando]="eliminando()"
+    (confirmar)="eliminar()"
+    (cancelar)="porEliminar.set(null)"
+  />
+}

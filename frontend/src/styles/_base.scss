@@ -1,0 +1,64 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  font-family: var(--fuente);
+  font-size: 15px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-foco);
+  outline-offset: 2px;
+}
+
+.texto-suave {
+  color: var(--color-texto-suave);
+}
+
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.alerta {
+  margin: 0 0 var(--espacio);
+  padding: 0.65rem 0.85rem;
+  border-radius: var(--radio);
+  border: 1px solid transparent;
+  font-size: 0.9rem;
+
+  &--error {
+    background: var(--color-peligro-fondo);
+    border-color: color-mix(in srgb, var(--color-peligro) 30%, transparent);
+    color: var(--color-peligro);
+  }
+}

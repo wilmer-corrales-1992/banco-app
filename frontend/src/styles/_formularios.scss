@@ -1,0 +1,68 @@
+.formulario {
+  &__rejilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 0.25rem 1rem;
+  }
+
+  &__acciones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+  }
+
+  &__casilla {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    margin-top: 1.4rem;
+    font-size: 0.9rem;
+  }
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 0.75rem;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  &__error {
+    margin: 0;
+    color: var(--color-peligro);
+    font-size: 0.8rem;
+  }
+
+  &--error .control {
+    border-color: var(--color-peligro);
+  }
+}
+
+.control {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  font: inherit;
+
+  &:focus {
+    border-color: var(--color-foco);
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-foco) 20%, transparent);
+  }
+
+  &:disabled {
+    background: var(--color-superficie-alterna);
+    color: var(--color-texto-suave);
+  }
+}

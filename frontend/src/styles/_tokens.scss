@@ -1,0 +1,26 @@
+:root {
+  --fuente: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --color-fondo: #ffffff;
+  --color-superficie: #ffffff;
+  --color-superficie-alterna: #f7f7f7;
+  --color-borde: #d9d9d9;
+  --color-borde-suave: #ebebeb;
+  --color-texto: #222222;
+  --color-texto-suave: #6b6b6b;
+  --color-marca: #2f4f7f;
+
+  --color-primario: #f2d10a;
+  --color-primario-hover: #e3c300;
+  --color-primario-texto: #1a1a1a;
+
+  --color-exito: #1b6e3a;
+  --color-exito-fondo: #e8f4ec;
+  --color-peligro: #b02a2a;
+  --color-peligro-fondo: #fcecec;
+  --color-foco: #2f6fd6;
+
+  --radio: 4px;
+  --sombra: 0 8px 24px rgb(0 0 0 / 12%);
+  --espacio: 1rem;
+}

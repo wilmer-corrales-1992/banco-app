@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: banco-api
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/banco}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: America/Tegucigalpa
+
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /api
+
+banco:
+  limite-diario-retiro: ${LIMITE_DIARIO_RETIRO:1000}

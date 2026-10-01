@@ -1,0 +1,94 @@
+.tabla-contenedor {
+  overflow-x: auto;
+  border: 1px solid var(--color-borde-suave);
+  border-radius: var(--radio);
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th,
+  td {
+    padding: 0.7rem 0.85rem;
+    border-bottom: 1px solid var(--color-borde-suave);
+  }
+
+  th {
+    white-space: nowrap;
+    background: var(--color-superficie-alterna);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-texto-suave);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  tbody tr:hover td {
+    background: #fcfcfc;
+  }
+
+  &__mensaje {
+    padding: 2rem 1rem;
+    color: var(--color-texto-suave);
+    text-align: center;
+  }
+
+  &__acciones {
+    width: 1%;
+    white-space: nowrap;
+  }
+}
+
+.alinear-izquierda {
+  text-align: left;
+}
+
+.alinear-derecha {
+  text-align: right;
+}
+
+.alinear-centro {
+  text-align: center;
+}
+
+.sin-salto {
+  white-space: nowrap;
+}
+
+.insignia {
+  white-space: nowrap;
+  display: inline-block;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+
+  &--activa {
+    background: var(--color-exito-fondo);
+    color: var(--color-exito);
+  }
+
+  &--inactiva {
+    background: var(--color-superficie-alterna);
+    color: var(--color-texto-suave);
+  }
+}
+
+.valor {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+
+  &--credito {
+    color: var(--color-exito);
+  }
+
+  &--debito {
+    color: var(--color-peligro);
+  }
+}

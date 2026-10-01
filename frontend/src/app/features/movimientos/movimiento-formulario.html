@@ -1,0 +1,67 @@
+<form [formGroup]="formulario" (ngSubmit)="guardar()" novalidate>
+  @if (errorGeneral(); as mensaje) {
+    <p class="alerta alerta--error" role="alert">{{ mensaje }}</p>
+  }
+
+  <div class="formulario__rejilla">
+    <app-campo-formulario
+      etiqueta="Cuenta"
+      para="movimiento-cuenta"
+      [control]="formulario.controls.numeroCuenta"
+    >
+      <select id="movimiento-cuenta" class="control" formControlName="numeroCuenta">
+        <option value="" disabled>Seleccione</option>
+        @for (cuenta of cuentas(); track cuenta.id) {
+          <option [value]="cuenta.numeroCuenta">
+            {{ cuenta.numeroCuenta }} {{ nombreTipoCuenta(cuenta.tipoCuenta) }} ({{
+              cuenta.cliente
+            }})
+          </option>
+        }
+      </select>
+    </app-campo-formulario>
+
+    <app-campo-formulario
+      etiqueta="Tipo de movimiento"
+      para="movimiento-tipo"
+      [control]="formulario.controls.tipoMovimiento"
+    >
+      <select id="movimiento-tipo" class="control" formControlName="tipoMovimiento">
+        <option [ngValue]="null" disabled>Seleccione</option>
+        @for (tipo of tipos; track tipo) {
+          <option [ngValue]="tipo">{{ nombreTipoMovimiento(tipo) }}</option>
+        }
+      </select>
+    </app-campo-formulario>
+
+    <app-campo-formulario
+      etiqueta="Valor"
+      para="movimiento-valor"
+      [control]="formulario.controls.valor"
+      [mensajes]="mensajesValor"
+    >
+      <input
+        id="movimiento-valor"
+        class="control"
+        type="number"
+        min="0.01"
+        step="0.01"
+        formControlName="valor"
+      />
+    </app-campo-formulario>
+  </div>
+
+  <p class="texto-suave">
+    El valor se ingresa siempre positivo; un débito se registra como retiro.
+    @if (esEdicion()) {
+      Solo se puede editar el último movimiento de cada cuenta.
+    }
+  </p>
+
+  <div class="formulario__acciones">
+    <button type="button" class="boton" (click)="cancelado.emit()">Cancelar</button>
+    <button type="submit" class="boton boton--primario" [disabled]="guardando()">
+      {{ guardando() ? 'Guardando...' : 'Guardar' }}
+    </button>
+  </div>
+</form>

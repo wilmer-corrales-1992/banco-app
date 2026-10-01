@@ -1,0 +1,57 @@
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.modal__fondo {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 35%);
+}
+
+.modal {
+  position: relative;
+  width: min(44rem, 100%);
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  border-radius: 6px;
+  background: var(--color-superficie);
+  box-shadow: var(--sombra);
+}
+
+.modal__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--color-borde-suave);
+}
+
+.modal__titulo {
+  font-size: 1.15rem;
+}
+
+.modal__cerrar {
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: var(--radio);
+  background: none;
+  color: var(--color-texto-suave);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-superficie-alterna);
+  }
+}
+
+.modal__cuerpo {
+  padding: 1.25rem;
+}
